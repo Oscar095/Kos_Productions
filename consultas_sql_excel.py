@@ -2,10 +2,18 @@ import requests
 import pandas as pd
 from sqlalchemy import create_engine, text
 import urllib
+from dotenv import load_dotenv
+import os
 
-# API endpoints to fetch data from AWS service
-API_OP_NUMEROS = "https://example.com/api/op-numeros"
-API_EXISTENCIAS = "https://example.com/api/existencias"
+
+# Cargar variables del archivo .env
+load_dotenv()
+
+CONNI_KEY = os.getenv("CONNI_KEY")
+CONNI_TOKEN = os.getenv("CONNI_TOKEN")
+API_OP_NUMEROS = os.getenv("API_OP_NUMEROS")
+API_EXISTENCIAS = os.getenv("API_EXISTENCIAS")
+
 
 params = urllib.parse.quote_plus(
     "DRIVER=ODBC Driver 18 for SQL Server;"
@@ -21,11 +29,34 @@ engine_str = f"mssql+pyodbc:///?odbc_connect={params}"
 engine = create_engine(engine_str)
 
 
-def fetch_data(url: str) -> pd.DataFrame:
-    """Request data from the given API endpoint and return a DataFrame."""
-    resp = requests.get(url, timeout=30)
-    resp.raise_for_status()
-    return pd.DataFrame(resp.json())
+def fetch_data(base_url: str) -> pd.DataFrame:
+    """Recorre todas las páginas del API y devuelve un DataFrame completo."""
+    all_data = []
+    page = 1
+    headers = {
+        "connekta-key": os.getenv("CONNI_KEY"),
+        "Authorization": f"Bearer {os.getenv('CONNI_TOKEN')}"
+    }
+
+    while True:
+        paginated_url = base_url.replace("numPag=1", f"numPag={page}")
+        resp = requests.get(paginated_url, headers=headers, timeout=30)
+        resp.raise_for_status()
+
+        # Extrae los datos
+        page_data = resp.json().get("Datos", [])
+        if not page_data:
+            break  # Si no hay datos, termina el bucle
+
+        all_data.extend(page_data)
+        
+        if len(page_data) < 100:
+            break  # Ya no hay más páginas
+
+        page += 1
+
+    return pd.DataFrame(all_data)
+
 
 
 def main() -> None:
