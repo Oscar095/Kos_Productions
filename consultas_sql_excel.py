@@ -4,6 +4,7 @@ from sqlalchemy import create_engine, text
 import urllib
 from dotenv import load_dotenv
 import os
+import pyodbc
 
 
 # Cargar variables del archivo .env
@@ -39,12 +40,12 @@ def fetch_data(base_url: str) -> pd.DataFrame:
     }
 
     while True:
-        paginated_url = base_url.replace("numPag=1", f"numPag={page}")
+        paginated_url = base_url.split("numPag=")[0] + f"numPag={page}|tamPag=100"
         resp = requests.get(paginated_url, headers=headers, timeout=30)
         resp.raise_for_status()
 
         # Extrae los datos
-        page_data = resp.json().get("Datos", [])
+        page_data = resp.json().get("Datos", []) 
         if not page_data:
             break  # Si no hay datos, termina el bucle
 
