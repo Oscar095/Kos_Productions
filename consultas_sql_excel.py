@@ -59,6 +59,9 @@ def fetch_data(base_url):
         page_data=data["detalle"]["Datos"]
 
         all_data.extend(page_data)
+
+        total_paginas= data['detalle']['total_páginas']
+        pagina= data['detalle']['página_actual']
         
         if not page_data:
             break  # Si no hay datos, termina el bucle
@@ -66,6 +69,9 @@ def fetch_data(base_url):
         if len(page_data) < tamPage:
             print(f"Última página ({page}) con {len(page_data)} registros.")
             break  # Ya no hay más páginas
+
+        if pagina==total_paginas :
+            break
 
         page += 1
         
