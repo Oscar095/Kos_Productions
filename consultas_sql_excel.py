@@ -87,8 +87,12 @@ def main():
     df_existencias = df_existencias.drop("LineaRegistro",axis=1)
 
     with engine.begin() as conn_dest:
+    # Eliminar los datos de ambas tablas
         conn_dest.execute(text("DELETE FROM op_numeros"))
+        conn_dest.execute(text("DBCC CHECKIDENT ('op_numeros', RESEED, 0)"))
+        
         conn_dest.execute(text("DELETE FROM existencias"))
+        conn_dest.execute(text("DBCC CHECKIDENT ('existencias', RESEED, 0)"))
 
     df_op.to_sql("op_numeros", con=engine, if_exists='append', index=False, chunksize=500)
     df_existencias.to_sql("existencias", con=engine, if_exists='append', index=False, chunksize=500)
