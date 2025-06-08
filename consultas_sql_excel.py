@@ -5,6 +5,7 @@ import urllib
 from dotenv import load_dotenv
 import os
 import pyodbc
+from datetime import datetime
 
 # Cargar variables del archivo .env
 load_dotenv()
@@ -99,7 +100,7 @@ def main():
     df_op.to_sql("op_numeros", con=engine, if_exists='append', index=False, chunksize=500)
     df_existencias.to_sql("existencias", con=engine, if_exists='append', index=False, chunksize=500)
 
-    print("Datos cargados correctamente en Azure SQL.")
+    print("Datos cargados correctamente en Azure SQL: ", datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
 
 
 if __name__ == "__main__":
