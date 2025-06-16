@@ -32,6 +32,7 @@ params = urllib.parse.quote_plus(
     "Encrypt=yes;"
 )
 
+
 engine_str = f"mssql+pyodbc:///?odbc_connect={params}"
 engine = create_engine(engine_str)
 
@@ -71,12 +72,25 @@ def enviar_datos_a_siesa():
         with engine.begin() as conn:  # begin => commit automático
             for _, row in df.iterrows():
                 payload = {
-                    "op": row["Docto"],
-                    "cantidad": int(row["Cantidad"]),
-                    "maquina": row["Maquina"],
-                    "fecha": row["Fecha"].strftime('%Y%m%d') if isinstance(row["Fecha"], datetime) else row["Fecha"],
-                    "operario": row["operario"]
-                }
+                            "f350_id_tipo_docto": "EPP",
+                            "f350_consec_docto": 1,
+                            "f350_fecha": row["Fecha"].strftime('%Y%m%d') if isinstance(row["Fecha"], datetime) else row["Fecha"],
+                            "f350_notas": row["operario"]+row["Maquina"],
+                            
+                            "f470_id_tipo_docto": "OPK",
+                            "f470_consec_docto": 1,
+                            "f470_nro_registro": 1,
+                            "f850_consec_docto": row["Docto"],
+                            "f470_id_item": "",
+                            "f470_referencia_item": "",
+                            "f470_codigo_barras": "",
+                            "f470_id_ext1_detalle": row["ext1"],
+                            "f470_id_ext2_detalle": row["ext2"],
+                            "f470_id_bodega": row["Bodega"],
+                            "f470_id_lote": row["Lote"],
+                            "f470_cant_base_entrega": row["Cantidad"]
+                            }
+                
                 print(payload)
 
                 # try:
