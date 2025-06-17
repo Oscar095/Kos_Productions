@@ -83,8 +83,7 @@ def fetch_data(base_url):
 
 def main():
     df_op = fetch_data(API_OP_NUMEROS)
-    df_op = df_op.drop("LineaRegistro",axis=1)
-    df_op=df_op[df_op["tipo_inv"]=="IN1430K.ex"] #Se debe eliminar  
+    df_op = df_op.drop("LineaRegistro",axis=1)  
 
     df_existencias = fetch_data(API_EXISTENCIAS)
     df_existencias = df_existencias.drop("LineaRegistro",axis=1)
