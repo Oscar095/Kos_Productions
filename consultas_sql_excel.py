@@ -52,7 +52,7 @@ def fetch_data(base_url):
 
         print(f"Consultando página {page}...")
 
-        response = requests.get(url, headers=headers)
+        response = requests.get(url, headers=headers, timeout=30)
 
         data = response.json()
 
