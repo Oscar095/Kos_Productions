@@ -43,7 +43,7 @@ headers = {
 API_URL = os.getenv("API_CARGUES_SIESA") #Falta cambiar la URL
 
 def enviar_datos_a_siesa():
-    # try:
+    try:
         # 1. Leer registros pendientes
         with engine.connect() as conn:
             query = text("""
@@ -63,21 +63,21 @@ def enviar_datos_a_siesa():
                     LEFT JOIN centro_costos cc on m.centro_costos_id = cc.Id
                 WHERE registro_siesa = 0
             """)
-            df = pd.read_sql(query, conn)
+            df = pd.read_sql(query, conn) # Tabla de Registros de OP
 
             query_ops =text("""
                     SELECT *    
                     FROM op_numeros           
             """)
             df_op = pd.read_sql(query_ops,conn)
-            df_op["und_medida"] = df_op["und_medida"].astype(str).str.strip()
+            df_op["und_medida"] = df_op["und_medida"].astype(str).str.strip() #Tabla de Ordenes de Produccion
 
         if df.empty:
             logging.info("No hay registros pendientes.")
             return
 
         # 2. Procesar cada registro
-        with engine.begin() as conn:  # begin => commit automático
+        with engine.begin() as conn: 
             for _, row in df.iterrows():
 
                 try:
@@ -92,7 +92,7 @@ def enviar_datos_a_siesa():
                         print(f"No se encontraron resultados para Docto {row['Docto']}")
                         continue  # Salta a la siguiente fila
 
-                    item=df_op.loc[filtro,"item"].values[0]
+                    item=df_op.loc[filtro,"id_item"].values[0]
                     lote=df_op.loc[filtro,"lote"].values[0]
                     ext1=df_op.loc[filtro,"ext1"].values[0]
                     ext2=df_op.loc[filtro,"ext2"].values[0]
@@ -103,46 +103,54 @@ def enviar_datos_a_siesa():
 
                 payload = {
                     #Documento
+                    "Documentos": [
+                        {
                         "f350_id_tipo_docto": "EPP",
                         "f350_consec_docto": 1,
-                        "f350_fecha": row["Fecha"].strftime('%Y%m%d') if isinstance(row["Fecha"], datetime) else row["Fecha"],
-                        "f350_notas": row["operario"]+" "+row["Maquina"],
+                        "f350_fecha": str(row["Fecha"].strftime('%Y%m%d') if isinstance(row["Fecha"], datetime) else row["Fecha"]),
+                        "f350_notas": str(row["operario"]+" "+row["Maquina"])
+                        }
+                    ],
                     #Movimiento
-                        "f470_id_tipo_docto": "OPK",
+                    "Movimientos": [
+                        {
+                        "f470_id_tipo_docto": "EPP",
                         "f470_consec_docto": 1,
                         "f470_nro_registro": 1,
-                        "f850_consec_docto": row["Docto"],
-                        "f470_id_item": item,
+                        "f850_consec_docto": int(row["Docto"]),
+                        "f470_id_item": int(item),
                         "f470_referencia_item": "",
                         "f470_codigo_barras": "",
-                        "f470_id_ext1_detalle": ext1,
-                        "f470_id_ext2_detalle": ext2,
-                        "f470_id_bodega": bodega,
-                        "f470_id_lote": lote,
-                        "f470_cant_base_entrega": row["Cantidad"]
+                        "f470_id_ext1_detalle": str(ext1),
+                        "f470_id_ext2_detalle": str(ext2),
+                        "f470_id_bodega": "026", #Cambiar Dinamico
+                        "f470_id_lote": int(lote),
+                        "f470_cant_base_entrega": int(row["Cantidad"])
                         }
-                
+                    ]
+                }
+                             
                 print(payload)
 
-                # try:
-                #     response = requests.post(API_URL, json=payload, headers=headers)
+                try:
+                    response = requests.post(API_URL, json=payload, headers=headers)
 
-                #     if response.status_code == 200:
-                #         # Marcar registro como enviado
-                #         conn.execute(
-                #             text("UPDATE registros_produccion SET registros_siesa = 1 WHERE id = :id"),
-                #             {"id": row["id"]}
-                #         )
-                #         logging.info(f"Registro ID {row['id']} enviado y actualizado.")
-                #     else:
-                #         logging.error(f"Error API para ID {row['id']}: {response.status_code} - {response.text}")
+                    if response.status_code == 200:
+                        # Marcar registro como enviado
+                        conn.execute(
+                            text("UPDATE registro_produccion SET registro_siesa = 1 WHERE id = :id"),
+                            {"id": row["id"]}
+                        )
+                        logging.info(f"Registro ID {row['id']} enviado y actualizado.")
+                    else:
+                        logging.error(f"Error API para ID {row['id']}: {response.status_code} - {response.text}")
 
-                # except Exception as e:
-                #     logging.exception(f"Excepción en envío del ID {row['id']}: {e}")
+                except Exception as e:
+                    logging.exception(f"Excepción en envío del ID {row['id']}: {e}")
 
-    # except Exception as e:
-    #     print("error")
-    #     logging.exception("Error general al ejecutar el proceso.")
+    except Exception as e:
+        print("error")
+        logging.exception("Error general al ejecutar el proceso.")
 
 if __name__ == "__main__":
     enviar_datos_a_siesa()
