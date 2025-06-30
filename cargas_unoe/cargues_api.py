@@ -7,6 +7,7 @@ from datetime import datetime
 import pyodbc
 import os
 import logging
+from cambio_lotes_impre import cambiar_lotes
 
 # Configurar logging
 logging.basicConfig(
@@ -40,7 +41,7 @@ headers = {
         "ConniToken": CONNI_TOKEN
     }
 
-API_URL = os.getenv("API_CARGUES_SIESA") #Falta cambiar la URL
+API_URL = os.getenv("API_CARGUES_SIESA")
 
 def enviar_datos_a_siesa():
     try:
@@ -70,7 +71,7 @@ def enviar_datos_a_siesa():
                     FROM op_numeros           
             """)
             df_op = pd.read_sql(query_ops,conn)
-            df_op["und_medida"] = df_op["und_medida"].astype(str).str.strip() #Tabla de Ordenes de Produccion
+            df_op["und_medida"] = df_op["und_medida"].astype(str).str.strip() #Tabla de Ordenes de Produccion sin espacios
 
         if df.empty:
             logging.info("No hay registros pendientes.")
@@ -97,6 +98,11 @@ def enviar_datos_a_siesa():
                     ext1=df_op.loc[filtro,"ext1"].values[0]
                     ext2=df_op.loc[filtro,"ext2"].values[0]
                     bodega=df_op.loc[filtro,"bodega"].values[0]
+
+                    if df_op.loc[filtro,"tipo_inv"].values[0]=="IN1410K.ex" and df_op.loc[filtro,"und_medida"].values[0]=="KG" :
+                        df_poly=df_op.loc[filtro]
+                        cambiar_lotes(df_poly)
+
                 except Exception as e:
                     print(f"No se encontraron resultados {row['Docto']} : {e}")
                     continue
@@ -129,8 +135,6 @@ def enviar_datos_a_siesa():
                         }
                     ]
                 }
-                             
-                print(payload)
 
                 try:
                     response = requests.post(API_URL, json=payload, headers=headers)
