@@ -17,10 +17,10 @@ headers = {
         "ConniToken": CONNI_TOKEN
     }
 
-def lote(df): #Encontrar Lote de OP a buscar
+def lote(id_lote): #Encontrar Lote de OP a buscar
     
-    df["lote"] = df["lote"].astype(str).str.strip()
-    lote_item=df["lote"].values[0]
+    # df["lote"] = df["lote"].astype(str).str.strip()
+    # lote_item=df["lote"].values[0]
 
     #Conexion a la base de datos
     params = urllib.parse.quote_plus(
@@ -44,28 +44,29 @@ def lote(df): #Encontrar Lote de OP a buscar
         df_existencias_lote = pd.read_sql(query, conn) # Tabla de inventarios
 
     df_existencias_lote["lote"]=df_existencias_lote["lote"].astype(str).str.strip()
-    item=df_existencias_lote.loc[df_existencias_lote["lote"]==lote_item,"id_item"].values[0]
+    item = df_existencias_lote.loc[df_existencias_lote["lote"]==id_lote,"id_item"].values[0]
 
     return item
 
 
-def cambiar_lotes(df_cargues_api):
+def cambiar_lotes(lote_rollo):
     
-    item=lote(df_cargues_api)
+    item=lote(lote_rollo)
+    print(item)
 
-    payload= {
-        "id_item": int(item)
-    }
+    # payload= {
+    #     "id_item": int(item)
+    # }
 
-    try:
-        response = requests.post(API_CAMBIAR_LOTES, json=payload, headers=headers)
+    # try:
+    #     response = requests.post(API_CAMBIAR_LOTES, json=payload, headers=headers)
 
-        if response.status_code == 200:
-            print("Lote cambiado correctamente")
-        else:
-            print(f"Error API: {response.status_code} - {response.text}")
+    #     if response.status_code == 200:
+    #         print("Lote cambiado correctamente")
+    #     else:
+    #         print(f"Error API: {response.status_code} - {response.text}")
 
-    except Exception as e:
-        print(f"Excepción en envío del ID: {e}")
+    # except Exception as e:
+    #     print(f"Excepción en envío del ID: {e}")
 
 

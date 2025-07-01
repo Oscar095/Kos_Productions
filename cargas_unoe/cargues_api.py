@@ -44,7 +44,7 @@ headers = {
 API_URL = os.getenv("API_CARGUES_SIESA")
 
 def enviar_datos_a_siesa():
-    try:
+    # try:
         # 1. Leer registros pendientes
         with engine.connect() as conn:
             query = text("""
@@ -57,7 +57,8 @@ def enviar_datos_a_siesa():
                     pp.nombre_operario operario,
                     cc.centro 'Centro de Trabajo',
                     cc.tipo_inv tipo_inv,
-                    cc.und und
+                    cc.und und,
+                    rp.lote
                 FROM registro_produccion rp
                     LEFT JOIN maquinas m ON rp.maquina = m.Id
                     LEFT JOIN personal_planta pp ON rp.operario= pp.Id
@@ -65,6 +66,7 @@ def enviar_datos_a_siesa():
                 WHERE registro_siesa = 0
             """)
             df = pd.read_sql(query, conn) # Tabla de Registros de OP
+            df["lote"] = df["lote"].astype(str).str.strip()
 
             query_ops =text("""
                     SELECT *    
@@ -81,7 +83,7 @@ def enviar_datos_a_siesa():
         with engine.begin() as conn: 
             for _, row in df.iterrows():
 
-                try:
+                # try:
 
                     filtro = (
                     (df_op["docto"] == row["Docto"]) &
@@ -93,6 +95,8 @@ def enviar_datos_a_siesa():
                         print(f"No se encontraron resultados para Docto {row['Docto']}")
                         continue  # Salta a la siguiente fila
 
+                    print(df_op.loc[filtro])
+
                     item=df_op.loc[filtro,"id_item"].values[0]
                     lote=df_op.loc[filtro,"lote"].values[0]
                     ext1=df_op.loc[filtro,"ext1"].values[0]
@@ -100,61 +104,61 @@ def enviar_datos_a_siesa():
                     bodega=df_op.loc[filtro,"bodega"].values[0]
 
                     if df_op.loc[filtro,"tipo_inv"].values[0]=="IN1410K.ex" and df_op.loc[filtro,"und_medida"].values[0]=="KG" :
-                        df_poly=df_op.loc[filtro]
-                        cambiar_lotes(df_poly)
+                        lote_rollo=row["lote"]
+                        cambiar_lotes(lote_rollo)
 
-                except Exception as e:
-                    print(f"No se encontraron resultados {row['Docto']} : {e}")
-                    continue
+    #             except Exception as e:
+    #                 print(f"No se encontraron resultados {row['Docto']} : {e}")
+    #                 continue
 
-                payload = {
-                    #Documento
-                    "Documentos": [
-                        {
-                        "f350_id_tipo_docto": "EPP",
-                        "f350_consec_docto": 1,
-                        "f350_fecha": str(row["Fecha"].strftime('%Y%m%d') if isinstance(row["Fecha"], datetime) else row["Fecha"]),
-                        "f350_notas": str(row["operario"]+" "+row["Maquina"])
-                        }
-                    ],
-                    #Movimiento
-                    "Movimientos": [
-                        {
-                        "f470_id_tipo_docto": "EPP",
-                        "f470_consec_docto": 1,
-                        "f470_nro_registro": 1,
-                        "f850_consec_docto": int(row["Docto"]),
-                        "f470_id_item": int(item),
-                        "f470_referencia_item": "",
-                        "f470_codigo_barras": "",
-                        "f470_id_ext1_detalle": str(ext1),
-                        "f470_id_ext2_detalle": str(ext2),
-                        "f470_id_bodega": "026", #Cambiar Dinamico
-                        "f470_id_lote": int(lote),
-                        "f470_cant_base_entrega": int(row["Cantidad"])
-                        }
-                    ]
-                }
+    #             payload = {
+    #                 #Documento
+    #                 "Documentos": [
+    #                     {
+    #                     "f350_id_tipo_docto": "EPP",
+    #                     "f350_consec_docto": 1,
+    #                     "f350_fecha": str(row["Fecha"].strftime('%Y%m%d') if isinstance(row["Fecha"], datetime) else row["Fecha"]),
+    #                     "f350_notas": str(row["operario"]+" "+row["Maquina"])
+    #                     }
+    #                 ],
+    #                 #Movimiento
+    #                 "Movimientos": [
+    #                     {
+    #                     "f470_id_tipo_docto": "EPP",
+    #                     "f470_consec_docto": 1,
+    #                     "f470_nro_registro": 1,
+    #                     "f850_consec_docto": int(row["Docto"]),
+    #                     "f470_id_item": int(item),
+    #                     "f470_referencia_item": "",
+    #                     "f470_codigo_barras": "",
+    #                     "f470_id_ext1_detalle": str(ext1),
+    #                     "f470_id_ext2_detalle": str(ext2),
+    #                     "f470_id_bodega": "026", #Cambiar Dinamico
+    #                     "f470_id_lote": int(lote),
+    #                     "f470_cant_base_entrega": int(row["Cantidad"])
+    #                     }
+    #                 ]
+    #             }
 
-                try:
-                    response = requests.post(API_URL, json=payload, headers=headers)
+    #             try:
+    #                 response = requests.post(API_URL, json=payload, headers=headers)
 
-                    if response.status_code == 200:
-                        # Marcar registro como enviado
-                        conn.execute(
-                            text("UPDATE registro_produccion SET registro_siesa = 1 WHERE id = :id"),
-                            {"id": row["id"]}
-                        )
-                        logging.info(f"Registro ID {row['id']} enviado y actualizado.")
-                    else:
-                        logging.error(f"Error API para ID {row['id']}: {response.status_code} - {response.text}")
+    #                 if response.status_code == 200:
+    #                     # Marcar registro como enviado
+    #                     conn.execute(
+    #                         text("UPDATE registro_produccion SET registro_siesa = 1 WHERE id = :id"),
+    #                         {"id": row["id"]}
+    #                     )
+    #                     logging.info(f"Registro ID {row['id']} enviado y actualizado.")
+    #                 else:
+    #                     logging.error(f"Error API para ID {row['id']}: {response.status_code} - {response.text}")
 
-                except Exception as e:
-                    logging.exception(f"Excepción en envío del ID {row['id']}: {e}")
+    #             except Exception as e:
+    #                 logging.exception(f"Excepción en envío del ID {row['id']}: {e}")
 
-    except Exception as e:
-        print("error")
-        logging.exception("Error general al ejecutar el proceso.")
+    # except Exception as e:
+    #     print("error")
+    #     logging.exception("Error general al ejecutar el proceso.")
 
 if __name__ == "__main__":
     enviar_datos_a_siesa()
