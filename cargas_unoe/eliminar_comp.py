@@ -17,59 +17,30 @@ headers = {
         "ConniToken": CONNI_TOKEN
     }
 
-def lote(id_lote): #Encontrar Lote de OP a buscar
-
-    #Conexion a la base de datos
-    params = urllib.parse.quote_plus(
-        "DRIVER=ODBC Driver 18 for SQL Server;"
-        "SERVER=myappskos.database.windows.net;"
-        "DATABASE=kos_apps;"
-        "UID=kos;"
-        "PWD=Ol38569824*;"
-        "TrustServerCertificate=yes;"
-        "Encrypt=yes;"
-    )
-
-    engine_str = f"mssql+pyodbc:///?odbc_connect={params}"
-    engine = create_engine(engine_str)
-
-    with engine.connect() as conn:
-        query = text("""
-            SELECT *                
-            FROM existencias_lote_019
-        """)
-        df_existencias_lote = pd.read_sql(query, conn) # Tabla de inventarios de rollos
-
-    df_existencias_lote["lote"]=df_existencias_lote["lote"].astype(str).str.strip()
-    item = df_existencias_lote.loc[df_existencias_lote["lote"]==id_lote,"id_item"].values[0]
-
-    return item
 
 
-def cambiar_lotes(lote_rollo,ext1,ext2,cant,docto):
+def eliminar_lote(item,ext1,ext2,docto):
     
-    item=lote(lote_rollo)
-
     payload= {
 
         "Movimientos Versión": [
             {
-            "F_ACTUALIZA_REG": "0",
+            "F_ACTUALIZA_REG": "3",
             "f850_id_tipo_docto_op": "OPK",
-            "f850_consec_docto_op": int(docto),
-            "f860_id_item_op": int(item),
+            "f850_consec_docto_op": docto,
+            "f860_id_item_op": item,
             "f860_referencia_item_op": "",
             "f860_codigo_barras_item_op": "",
-            "f851_id_ext1_detalle_item_op": str(ext1),
-            "f851_id_ext2_detalle_item_op": str(ext2),
+            "f851_id_ext1_detalle_item_op": ext1,
+            "f851_id_ext2_detalle_item_op": ext2,
             "f860_numero_operacion": "0",
             "f860_id_bodega": "026",
-            "f860_id_item_comp": int(item),
+            "f860_id_item_comp": "****",
             "f860_referencia_item_comp": "",
             "f860_codigo_barras_item_comp": "",
             "f851_id_ext1_detalle_item_comp": "",
             "f851_id_ext2_detalle_item_comp": "",
-            "f860_cant_requerida_base": int(cant),
+            "f860_cant_requerida_base": "",
             "f860_cant_requerida_2": "0",
             "f860_notas": ""
             }
