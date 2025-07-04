@@ -4,6 +4,7 @@ from sqlalchemy import create_engine, text
 import os
 from dotenv import load_dotenv
 import urllib
+from eliminar_comp import componente, eliminar_lote
 
 load_dotenv()
 
@@ -46,9 +47,11 @@ def lote(id_lote): #Encontrar Lote de OP a buscar
     return item
 
 
-def cambiar_lotes(lote_rollo,ext1,ext2,cant,docto):
+def cambiar_lotes(lote_rollo,ext1,ext2,cant,docto,item_padre):
     
-    item=lote(lote_rollo)
+    item=lote(lote_rollo) #Item del lote agregado desde registro produccion
+    item_compo_delete=componente(docto,item_padre) #Buscar el item del componente predeterminado
+
 
     payload= {
 
@@ -57,13 +60,13 @@ def cambiar_lotes(lote_rollo,ext1,ext2,cant,docto):
             "F_ACTUALIZA_REG": "0",
             "f850_id_tipo_docto_op": "OPK",
             "f850_consec_docto_op": int(docto),
-            "f860_id_item_op": int(item),
+            "f860_id_item_op": int(item_padre),
             "f860_referencia_item_op": "",
             "f860_codigo_barras_item_op": "",
             "f851_id_ext1_detalle_item_op": str(ext1),
             "f851_id_ext2_detalle_item_op": str(ext2),
             "f860_numero_operacion": "0",
-            "f860_id_bodega": "026",
+            "f860_id_bodega": "019",
             "f860_id_item_comp": int(item),
             "f860_referencia_item_comp": "",
             "f860_codigo_barras_item_comp": "",
@@ -80,7 +83,8 @@ def cambiar_lotes(lote_rollo,ext1,ext2,cant,docto):
         response = requests.post(API_CAMBIAR_LOTES, json=payload, headers=headers)
 
         if response.status_code == 200:
-            print("Lote cambiado correctamente")
+            print("Lote cambiado correctamente") #Cargar el nuevo item del lote
+            eliminar_lote (item_padre,ext1,ext2,docto,item_compo_delete) #Eliminar el item predeterminado de la OP
         else:
             print(f"Error API: {response.status_code} - {response.text}")
 

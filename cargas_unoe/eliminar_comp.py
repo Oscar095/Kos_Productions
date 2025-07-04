@@ -9,17 +9,37 @@ load_dotenv()
 
 CONNI_KEY = os.getenv("CONNI_KEY")
 CONNI_TOKEN = os.getenv("CONNI_TOKEN")
-API_EXISTENCIAS_019 = os.getenv("API_EXISTENCIAS_019")
 API_CAMBIAR_LOTES =os.getenv("API_CAMBIAR_LOTES")
+API_COMPONENTES_OP = os.getenv("API_COMPONENTES_OP")
 
 headers = {
         "ConniKey": CONNI_KEY,
         "ConniToken": CONNI_TOKEN
     }
 
+def componente(docto, item):
+        
+        API_URL_BASE = API_COMPONENTES_OP.split("?")[0]
+        API_QUERY_PARAMS = API_COMPONENTES_OP.split("?")[1]
+
+        query_params = API_QUERY_PARAMS.replace("{docto}", str(docto))
+        url = f"{API_URL_BASE}?{query_params}"
+
+        response = requests.get(url, headers=headers, timeout=30)
+
+        data = response.json()
+        page_data=data["detalle"]["Datos"]
+
+        # Extrae los datos
+        
+        df=pd.DataFrame(page_data)
+
+        item_componente=df.loc[item==df["item_padre"],"item_comp"].values[0]
+
+        return item_componente
 
 
-def eliminar_lote(item,ext1,ext2,docto):
+def eliminar_lote(item_padre,ext1,ext2,docto,item_componente):
     
     payload= {
 
@@ -27,20 +47,20 @@ def eliminar_lote(item,ext1,ext2,docto):
             {
             "F_ACTUALIZA_REG": "3",
             "f850_id_tipo_docto_op": "OPK",
-            "f850_consec_docto_op": docto,
-            "f860_id_item_op": item,
+            "f850_consec_docto_op": int(docto),
+            "f860_id_item_op": int(item_padre),
             "f860_referencia_item_op": "",
             "f860_codigo_barras_item_op": "",
-            "f851_id_ext1_detalle_item_op": ext1,
-            "f851_id_ext2_detalle_item_op": ext2,
+            "f851_id_ext1_detalle_item_op": str(ext1),
+            "f851_id_ext2_detalle_item_op": str(ext2),
             "f860_numero_operacion": "0",
             "f860_id_bodega": "026",
-            "f860_id_item_comp": "****",
+            "f860_id_item_comp": int(item_componente),
             "f860_referencia_item_comp": "",
             "f860_codigo_barras_item_comp": "",
             "f851_id_ext1_detalle_item_comp": "",
             "f851_id_ext2_detalle_item_comp": "",
-            "f860_cant_requerida_base": "",
+            "f860_cant_requerida_base": "0",
             "f860_cant_requerida_2": "0",
             "f860_notas": ""
             }
@@ -51,11 +71,9 @@ def eliminar_lote(item,ext1,ext2,docto):
         response = requests.post(API_CAMBIAR_LOTES, json=payload, headers=headers)
 
         if response.status_code == 200:
-            print("Lote cambiado correctamente")
+            print("Lote anterior eliminado correctamente")
         else:
             print(f"Error API: {response.status_code} - {response.text}")
 
     except Exception as e:
         print(f"Excepción en envío del ID: {e}")
-
-

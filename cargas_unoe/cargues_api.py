@@ -59,6 +59,7 @@ def enviar_datos_a_siesa():
                     cc.tipo_inv tipo_inv,
                     cc.und und,
                     rp.lote
+                    rp.kg_lote
                 FROM registro_produccion rp
                     LEFT JOIN maquinas m ON rp.maquina = m.Id
                     LEFT JOIN personal_planta pp ON rp.operario= pp.Id
@@ -97,17 +98,19 @@ def enviar_datos_a_siesa():
 
                     print(df_op.loc[filtro])
 
-                    item=df_op.loc[filtro,"id_item"].values[0]
-                    lote=df_op.loc[filtro,"lote"].values[0]
+                    item=df_op.loc[filtro,"id_item"].values[0] #Item Padre
+                    lote=df_op.loc[filtro,"lote"].values[0] #Lote predeterminado de la OP
                     ext1=df_op.loc[filtro,"ext1"].values[0]
                     ext2=df_op.loc[filtro,"ext2"].values[0]
                     cantidad=df_op.loc[filtro,"cantidad"].values[0]
                     bodega=df_op.loc[filtro,"bodega"].values[0]
+                    cantidad_carga=row["Cantidad"]
 
                     if df_op.loc[filtro,"tipo_inv"].values[0]=="IN1410K.ex" and df_op.loc[filtro,"und_medida"].values[0]=="KG" :
                         lote_rollo=row["lote"]
-                        cambiar_lotes(lote_rollo,ext1,ext2,cantidad,row["Docto"])  #Cambiar el item del componente de la OP
-                        lote=lote_rollo
+                        cambiar_lotes(lote_rollo,ext1,ext2,cantidad,row["Docto"],item)  #Cambiar el item del componente de la OP
+                        lote=lote_rollo #Lote registrado en la OP
+                        cantidad_carga=row["kg_lote"] #Cantidad en Kilos a cargar
 
                 except Exception as e:
                     print(f"No se encontraron resultados {row['Docto']} : {e}")
@@ -137,7 +140,7 @@ def enviar_datos_a_siesa():
                         "f470_id_ext2_detalle": str(ext2),
                         "f470_id_bodega": "026", # Cambiar Dinamico
                         "f470_id_lote": int(lote),
-                        "f470_cant_base_entrega": int(row["Cantidad"])
+                        "f470_cant_base_entrega": int(cantidad_carga)
                         }
                     ]
                 }
