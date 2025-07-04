@@ -2,3 +2,4 @@
 logs/
 run.sh
 envio_siesa.log
+__pycache__

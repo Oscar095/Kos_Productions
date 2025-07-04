@@ -58,7 +58,7 @@ def enviar_datos_a_siesa():
                     cc.centro 'Centro de Trabajo',
                     cc.tipo_inv tipo_inv,
                     cc.und und,
-                    rp.lote
+                    rp.lote,
                     rp.kg_lote
                 FROM registro_produccion rp
                     LEFT JOIN maquinas m ON rp.maquina = m.Id
@@ -139,7 +139,7 @@ def enviar_datos_a_siesa():
                         "f470_id_ext1_detalle": str(ext1),
                         "f470_id_ext2_detalle": str(ext2),
                         "f470_id_bodega": "026", # Cambiar Dinamico
-                        "f470_id_lote": int(lote),
+                        "f470_id_lote": str(lote),
                         "f470_cant_base_entrega": int(cantidad_carga)
                         }
                     ]
