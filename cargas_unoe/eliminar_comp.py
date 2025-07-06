@@ -1,9 +1,9 @@
 import requests
 import pandas as pd
-from sqlalchemy import create_engine, text
-import os
 from dotenv import load_dotenv
-import urllib
+import os
+import datetime
+import json
 
 load_dotenv()
 
@@ -11,11 +11,108 @@ CONNI_KEY = os.getenv("CONNI_KEY")
 CONNI_TOKEN = os.getenv("CONNI_TOKEN")
 API_CAMBIAR_LOTES =os.getenv("API_CAMBIAR_LOTES")
 API_COMPONENTES_OP = os.getenv("API_COMPONENTES_OP")
+API_TPK = os.getenv("API_TPK")
 
 headers = {
         "ConniKey": CONNI_KEY,
-        "ConniToken": CONNI_TOKEN
+        "ConniToken": CONNI_TOKEN,
+        'Content-Type': 'application/json'
     }
+
+def tpk(cant, lote, item_comp):
+     
+    fecha = datetime.datetime.now()
+
+    payload = json.dumps({
+    "Inicial": [
+        {
+        "F_CIA": "1"
+        }
+    ],
+    "Documentos": [
+        {
+        "F_CIA": "1",
+        "F_CONSEC_AUTO_REG": "1",
+        "f350_id_co": "001",
+        "f350_id_tipo_docto": "TPK",
+        "f350_consec_docto": "1",
+        "f350_fecha": "20250705",
+        "f350_id_tercero": "",
+        "f350_id_clase_docto": "67",
+        "f350_ind_estado": "0",
+        "f350_ind_impresion": "0",
+        "f350_notas": "",
+        "f450_id_concepto": "607",
+        "f450_id_bodega_salida": "019",
+        "f450_id_bodega_entrada": "029",
+        "f450_docto_alterno": "",
+        "f350_id_co_base": "001",
+        "f350_id_tipo_docto_base": "",
+        "f350_consec_docto_base": "",
+        "f462_id_vehiculo": "",
+        "f462_id_tercero_transp": "",
+        "f462_id_sucursal_transp": "",
+        "f462_id_tercero_conductor": "",
+        "f462_nombre_conductor": "",
+        "f462_identif_conductor": "",
+        "f462_numero_guia": "",
+        "f462_cajas": "",
+        "f462_peso": "",
+        "f462_volumen": "",
+        "f462_valor_seguros": "",
+        "f462_notas": ""
+        }
+    ],
+    "Movimientos": [
+        {
+        "F_CIA": "1",
+        "f470_id_co": "001",
+        "f470_id_tipo_docto": "TPK",
+        "f470_consec_docto": "1",
+        "f470_nro_registro": "1",
+        "f470_id_bodega": "019",
+        "f470_id_ubicacion_aux": "",
+        "f470_id_lote": "01370",
+        "f470_id_concepto": "607",
+        "f470_id_motivo": "04",
+        "f470_id_co_movto": "001",
+        "f470_id_ccosto_movto": "",
+        "f470_id_proyecto": "",
+        "f470_id_unidad_medida": "KG",
+        "f470_cant_base": "4",
+        "f470_cant_2": "",
+        "f470_costo_prom_uni": "0",
+        "f470_notas": "",
+        "f470_desc_varible": "",
+        "F_DESC_ITEM": "",
+        "F_ID_UM_INVENTARIO": "",
+        "f470_id_ubicacion_aux_ent": "",
+        "f470_id_lote_ent": "01370",
+        "f470_id_item": "33807",
+        "f470_referencia_item": "",
+        "f470_codigo_barras": "",
+        "f470_id_ext1_detalle": "",
+        "f470_id_ext2_detalle": "",
+        "f470_id_un_movto": "01"
+        }
+    ],
+    "Final": [
+        {
+        "F_CIA": "1"
+        }
+    ]
+    })
+
+    try:
+        response = requests.request("POST", API_TPK, headers=headers, data=payload)
+
+        if response.status_code == 200:
+            print("Lote Transferido Correctamente")
+        else:
+            print(f"Error API: {response.status_code} - {response.text}")
+
+    except Exception as e:
+        print(f"Excepción en envío del ID: {e}")
 
 def componente(docto, item):
         
@@ -37,7 +134,6 @@ def componente(docto, item):
         item_componente=df.loc[item==df["item_padre"],"item_comp"].values[0]
 
         return item_componente
-
 
 def eliminar_lote(item_padre,ext1,ext2,docto,item_componente):
     
@@ -77,3 +173,6 @@ def eliminar_lote(item_padre,ext1,ext2,docto,item_componente):
 
     except Exception as e:
         print(f"Excepción en envío del ID: {e}")
+
+if __name__ == "__main__":
+    tpk(4,'01370',33807)
