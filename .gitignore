@@ -2,4 +2,4 @@
 logs/
 run.sh
 envio_siesa.log
-__pycache__
+cargas_unoe/__pycache__
