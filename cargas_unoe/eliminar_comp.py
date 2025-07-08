@@ -114,7 +114,7 @@ def tpk(cant, lote, item_comp):
     except Exception as e:
         print(f"Excepción en envío del ID: {e}")
 
-def componente(docto, item):
+def componente(docto, item): #Extraer Item Componente
         
         API_URL_BASE = API_COMPONENTES_OP.split("?")[0]
         API_QUERY_PARAMS = API_COMPONENTES_OP.split("?")[1]
@@ -173,6 +173,3 @@ def eliminar_lote(item_padre,ext1,ext2,docto,item_componente):
 
     except Exception as e:
         print(f"Excepción en envío del ID: {e}")
-
-if __name__ == "__main__":
-    tpk(4,'01370',33807)

@@ -5,13 +5,15 @@ import os
 from dotenv import load_dotenv
 import urllib
 from eliminar_comp import componente, eliminar_lote
+import datetime
 
 load_dotenv()
 
 CONNI_KEY = os.getenv("CONNI_KEY")
 CONNI_TOKEN = os.getenv("CONNI_TOKEN")
 API_EXISTENCIAS_019 = os.getenv("API_EXISTENCIAS_019")
-API_CAMBIAR_LOTES =os.getenv("API_CAMBIAR_LOTES")
+API_CAMBIAR_LOTES = os.getenv("API_CAMBIAR_LOTES")
+CREAR_LOTES = os.getenv("CREAR_LOTES")
 
 headers = {
         "ConniKey": CONNI_KEY,
@@ -47,6 +49,35 @@ def lote(id_lote): #Encontrar Lote de OP a buscar
     return item
 
 
+def crear_lote(lote_com,item_padre,ext1, ext2):
+    
+    fecha = datetime.datetime.now()
+
+    payload = {
+        "Versión": [
+            {
+            "f403_id": str(lote_com),
+            "f403_id_item": int(item_padre),
+            "f403_id_ext1_detalle": str(ext1),
+            "f403_id_ext2_detalle": str(ext2),
+            "f403_fecha_creacion": str(fecha.strftime('%Y%m%d')),
+            "f403_fecha_vcto": str(fecha.strftime('%Y%m%d'))
+            }
+        ]
+        }
+    
+    try:
+        response = requests.post(CREAR_LOTES, json=payload, headers=headers)
+
+        if response.status_code == 200:
+            print("Lote creado item padre") #Cargar el nuevo item del lote
+        else:
+            print(f"Error API: {response.status_code} - {response.text}")
+
+    except Exception as e:
+        print(f"Excepción en envío del ID: {e}")
+
+
 def cambiar_lotes(lote_rollo,ext1,ext2,cant,docto,item_padre):
     
     item=lote(lote_rollo) #Item del lote agregado desde registro produccion
@@ -66,7 +97,7 @@ def cambiar_lotes(lote_rollo,ext1,ext2,cant,docto,item_padre):
             "f851_id_ext1_detalle_item_op": str(ext1),
             "f851_id_ext2_detalle_item_op": str(ext2),
             "f860_numero_operacion": "0",
-            "f860_id_bodega": "019",
+            "f860_id_bodega": "029",
             "f860_id_item_comp": int(item),
             "f860_referencia_item_comp": "",
             "f860_codigo_barras_item_comp": "",

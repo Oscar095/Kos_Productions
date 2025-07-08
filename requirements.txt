@@ -4,3 +4,4 @@ sqlalchemy
 numpy
 python-dotenv
 pyodbc
+django

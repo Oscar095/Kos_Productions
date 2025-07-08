@@ -1,0 +1,18 @@
+{% extends 'scripts_app/base.html' %}
+
+{% block content %}
+<h2>Bienvenido, {{ user.username }}</h2>
+<p>Esta es la interfaz para ejecutar scripts.</p>
+{% endblock %}
+
+# templates/registration/login.html
+{% extends 'scripts_app/base.html' %}
+
+{% block content %}
+<h2>Iniciar sesión</h2>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-primary">Entrar</button>
+</form>
+{% endblock %}

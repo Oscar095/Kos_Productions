@@ -7,7 +7,8 @@ from datetime import datetime
 import pyodbc
 import os
 import logging
-from cambio_lotes_impre import cambiar_lotes
+from cambio_lotes_impre import cambiar_lotes, crear_lote
+from eliminar_comp import tpk, componente
 
 # Configurar logging
 logging.basicConfig(
@@ -111,6 +112,10 @@ def enviar_datos_a_siesa():
                         cambiar_lotes(lote_rollo,ext1,ext2,cantidad,row["Docto"],item)  #Cambiar el item del componente de la OP
                         lote=lote_rollo #Lote registrado en la OP
                         cantidad_carga=row["kg_lote"] #Cantidad en Kilos a cargar
+                        item_compo=componente(row["Docto"],item)
+                        tpk(cantidad_carga,lote_rollo,item_compo)
+                        crear_lote(lote_rollo,item,ext1,ext2)
+
 
                 except Exception as e:
                     print(f"No se encontraron resultados {row['Docto']} : {e}")
