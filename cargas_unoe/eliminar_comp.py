@@ -19,8 +19,8 @@ headers = {
         'Content-Type': 'application/json'
     }
 
-def tpk(cant, lote, item_comp):
-     
+def tpk(cant, lote, item_comp, bodega_comp):
+    
     fecha = datetime.datetime.now()
 
     payload = json.dumps({
@@ -43,7 +43,7 @@ def tpk(cant, lote, item_comp):
         "f350_ind_impresion": "0",
         "f350_notas": "",
         "f450_id_concepto": "607",
-        "f450_id_bodega_salida": "019",
+        "f450_id_bodega_salida": str(bodega_comp),
         "f450_id_bodega_entrada": "029",
         "f450_docto_alterno": "",
         "f350_id_co_base": "001",
@@ -70,7 +70,7 @@ def tpk(cant, lote, item_comp):
         "f470_id_tipo_docto": "TPK",
         "f470_consec_docto": "1",
         "f470_nro_registro": "1",
-        "f470_id_bodega": "019",
+        "f470_id_bodega": str(bodega_comp),
         "f470_id_ubicacion_aux": "",
         "f470_id_lote": str(lote),
         "f470_id_concepto": "607",
@@ -110,6 +110,7 @@ def tpk(cant, lote, item_comp):
             print("Lote Transferido Correctamente")
         else:
             print(f"Error API: {response.status_code} - {response.text}")
+        
 
     except Exception as e:
         print(f"Excepción en envío del ID: {e}")

@@ -9,6 +9,7 @@ import os
 import logging
 from cambio_lotes_impre import cambiar_lotes, crear_lote
 from eliminar_comp import tpk, componente
+from cambio_lotes_impre import lote_bodega
 
 # Configurar logging
 logging.basicConfig(
@@ -113,7 +114,8 @@ def enviar_datos_a_siesa():
                         lote=lote_rollo #Lote registrado en la OP
                         cantidad_carga=row["kg_lote"] #Cantidad en Kilos a cargar
                         item_compo=componente(row["Docto"],item)
-                        tpk(cantidad_carga,lote_rollo,item_compo)
+                        bodega_comp = lote_bodega(lote_rollo)
+                        tpk(cantidad_carga,lote_rollo,item_compo,bodega_comp)
                         crear_lote(lote_rollo,item,ext1,ext2)
 
 
@@ -162,9 +164,11 @@ def enviar_datos_a_siesa():
                         logging.info(f"Registro ID {row['id']} enviado y actualizado.")
                     else:
                         logging.error(f"Error API para ID {row['id']}: {response.status_code} - {response.text}")
+                        print(response.text)
 
                 except Exception as e:
                     logging.exception(f"Excepción en envío del ID {row['id']}: {e}")
+                    continue
 
     except Exception as e:
         print("error")
