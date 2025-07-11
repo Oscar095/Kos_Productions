@@ -1,0 +1,17 @@
+{% extends 'scripts_app/base.html' %}
+
+{% block content %}
+<h2>Bienvenido, {{ user.first_name }} {{ user.last_name }}</h2>
+<p>Selecciona un script para ejecutar, espera mientras se ejecuta el comando:</p>
+<ul class="list-group">
+    {% for script in scripts %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            <div>
+                <strong>{{ script.name }}</strong><br>
+                <small>{{ script.description }}</small>
+            </div>
+            <a href="{% url 'run_script' script.id %}" class="btn btn-success">Ejecutar</a>
+        </li>
+    {% endfor %}
+</ul>
+{% endblock %}
