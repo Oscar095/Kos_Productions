@@ -164,7 +164,15 @@ def enviar_datos_a_siesa():
                         logging.info(f"Registro ID {row['id']} enviado y actualizado.")
                     else:
                         logging.error(f"Error API para ID {row['id']}: {response.status_code} - {response.text}")
-                        print(response.text)
+                        
+                        data = response.json()
+
+                        f_detalle = data["detalle"][0]["f_detalle"]                        
+                        
+                        conn.execute(
+                             text("UPDATE registro_produccion SET resultado_siesa = :detalle WHERE id = :id"),
+                                {"detalle": f_detalle, "id": row["id"]}
+                        )
 
                 except Exception as e:
                     logging.exception(f"Excepción en envío del ID {row['id']}: {e}")
