@@ -39,7 +39,7 @@ def tpk(cant, lote, item_comp, bodega_comp):
         "f350_fecha": str(fecha.strftime('%Y%m%d')),
         "f350_id_tercero": "",
         "f350_id_clase_docto": "67",
-        "f350_ind_estado": "0",
+        "f350_ind_estado": "1",
         "f350_ind_impresion": "0",
         "f350_notas": "",
         "f450_id_concepto": "607",
