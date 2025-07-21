@@ -1,8 +1,9 @@
+django>=4.2
+gunicorn
+pyodbc
+django-mssql-backend
 requests
 pandas
 sqlalchemy
 numpy
 python-dotenv
-pyodbc
-django
-gunicorn
