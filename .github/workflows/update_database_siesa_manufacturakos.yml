@@ -65,4 +65,4 @@ jobs:
         with:
           app-name: 'manufacturakos'
           slot-name: 'Production'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_BCAD3B138F784A128E538E7D0DDB7BAD }}
+          publish-profile: ${{ 'secrets.AZUREAPPSERVICE_PUBLISHPROFILE_BCAD3B138F784A128E538E7D0DDB7BAD' }}
