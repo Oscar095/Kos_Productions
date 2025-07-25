@@ -49,7 +49,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'ejecutor.ejecutor.wsgi.application'
+WSGI_APPLICATION = 'ejecutor.wsgi.application'
 
 DATABASES = {
     'default': {
