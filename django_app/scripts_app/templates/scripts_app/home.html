@@ -1,17 +1,27 @@
 {% extends 'scripts_app/base.html' %}
 
+{% block title %}Inicio - Kos Admin{% endblock %}
+{% block header_title %}Bienvenido, {{ user.first_name }} {{ user.last_name }}{% endblock %}
+
 {% block content %}
-<h2>Bienvenido, {{ user.first_name }} {{ user.last_name }}</h2>
-<p>Selecciona un script para ejecutar, espera mientras se ejecuta el comando:</p>
-<ul class="list-group">
-    {% for script in scripts %}
+<p>Selecciona un script para ejecutar. Espera mientras se ejecuta el comando:</p>
+
+<div class="card">
+  <div class="card-body">
+    <ul class="list-group">
+      {% for script in scripts %}
         <li class="list-group-item d-flex justify-content-between align-items-center">
-            <div>
-                <strong>{{ script.name }}</strong><br>
-                <small>{{ script.description }}</small>
-            </div>
-            <a href="{% url 'run_script' script.id %}" class="btn btn-success">Ejecutar</a>
+          <div>
+            <strong>{{ script.name }}</strong><br>
+            <small>{{ script.description }}</small>
+          </div>
+          <a href="{% url 'run_script' script.id %}" class="btn btn-success btn-sm">Ejecutar</a>
         </li>
-    {% endfor %}
-</ul>
+      {% empty %}
+        <li class="list-group-item text-muted">No hay scripts disponibles.</li>
+      {% endfor %}
+    </ul>
+  </div>
+</div>
 {% endblock %}
+
