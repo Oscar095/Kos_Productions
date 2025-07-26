@@ -1,10 +1,13 @@
 {% extends 'scripts_app/base.html' %}
+{% load static %}
+{% block title %}Panel de Control{% endblock %}
+{% block header_title %}Bienvenido{% endblock %}
 
-{% block title %}Inicio - Kos Admin{% endblock %}
-{% block header_title %}Bienvenido, {{ user.first_name }} {{ user.last_name }}{% endblock %}
+<!-- Favicon -->
+  <link rel="icon" type="image/png" href="{% static 'assets/img/favicon.png' %}">
 
-{% block content %}
-<p>Selecciona un script para ejecutar. Espera mientras se ejecuta el comando:</p>
+  {% block content %}
+<p>Selecciona un script para ejecutar, Espera mientras se ejecuta el comando:</p>
 
 <div class="card">
   <div class="card-body">
