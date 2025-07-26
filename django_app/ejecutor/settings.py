@@ -8,9 +8,9 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'clave-insegura')
 
 DEBUG = False
 
-CSRF_TRUSTED_ORIGINS = ['https://manufacturakos.azurewebsites.net']
-
 ALLOWED_HOSTS = ['https://manufacturakos.azurewebsites.net']  # Puedes usar tuapp.azurewebsites.net
+
+#CSRF_TRUSTED_ORIGINS = ['https://manufacturakos.azurewebsites.net']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
