@@ -7,7 +7,7 @@
   <link rel="icon" type="image/png" href="{% static 'assets/img/favicon.png' %}">
 
   {% block content %}
-<p>Selecciona un script para ejecutar, Espera mientras se ejecuta el comando:</p>
+<p>Selecciona un comando para ejecutar:</p>
 
 <div class="card">
   <div class="card-body">
@@ -18,11 +18,28 @@
             <strong>{{ script.name }}</strong><br>
             <small>{{ script.description }}</small>
           </div>
-          <a href="{% url 'run_script' script.id %}" class="btn btn-success btn-sm">Ejecutar</a>
+          <form method="get" action="{% url 'run_script' script.id %}" class="mb-0" onsubmit="return handleExecution(this);">
+                <button type="submit" class="btn btn-success">
+                    Ejecutar
+                </button>
+            </form>
         </li>
       {% empty %}
         <li class="list-group-item text-muted">No hay scripts disponibles.</li>
       {% endfor %}
+
+<script>
+function handleExecution(form) {
+    const button = form.querySelector('button');
+    button.disabled = true;
+    button.innerHTML = `
+        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+        Ejecutando...
+    `;
+    return true;
+}
+</script>
+
     </ul>
   </div>
 </div>
