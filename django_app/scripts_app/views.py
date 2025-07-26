@@ -8,6 +8,10 @@ import os
 from django.conf import settings
 
 @login_required
+def resumen_informes(request):
+    return render(request, 'scripts_app/resumen_informes.html')
+
+@login_required
 def home(request):
     scripts = Script.objects.all()
     return render(request, 'scripts_app/home.html', {'scripts': scripts})
