@@ -1,0 +1,16 @@
+{% extends 'scripts_app/base.html' %}
+
+{% block header_title %}Resumen de Informes de Producción{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="card-body">
+    <!-- Pega tu iframe aquí -->
+    <div style="height: 1000px; overflow: hidden;">
+        <iframe title="Produccion_2025" width="1200" height="900" 
+            src="https://app.powerbi.com/view?r=eyJrIjoiMTU0Y2E0M2QtZDZhMC00MTUzLWI0NjMtMmI5ZjUyOTQ1ZDAxIiwidCI6IjZlYTU5NTA3LWNkZmYtNDgyNC04YmY2LWIyNWE2ZDBlYWI1NiJ9" 
+            frameborder="0" allowFullScreen="true"></iframe>
+    </div>
+  </div>
+</div>
+{% endblock %}

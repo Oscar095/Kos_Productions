@@ -1,0 +1,35 @@
+name: Build and deploy Python app to Azure Web App - manufacturakos
+
+on:
+  push:
+    branches:
+      - update_database_siesa
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Collect static files
+        run: |
+          python ./django_app/manage.py collectstatic --noinput
+
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: 'manufacturakos'
+          slot-name: 'Production'
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_BCAD3B138F784A128E538E7D0DDB7BAD }}
+          package: .

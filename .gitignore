@@ -1,0 +1,5 @@
+.venv/
+logs/
+run.sh
+envio_siesa.log
+cargas_unoe/__pycache__
