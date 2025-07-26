@@ -24,7 +24,7 @@ jobs:
 
       - name: Collect static files
         run: |
-          python manage.py collectstatic --noinput
+          python ./django_app/manage.py collectstatic --noinput
 
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
