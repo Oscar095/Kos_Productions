@@ -19,7 +19,7 @@ headers = {
         'Content-Type': 'application/json'
     }
 
-def tpk(cant, lote, item_comp, bodega_comp):
+def tpk(cant, lote, item_comp, bodega_comp, bodega_ent):
     
     fecha = datetime.datetime.now()
 
@@ -44,7 +44,7 @@ def tpk(cant, lote, item_comp, bodega_comp):
         "f350_notas": "",
         "f450_id_concepto": "607",
         "f450_id_bodega_salida": str(bodega_comp),
-        "f450_id_bodega_entrada": "029",
+        "f450_id_bodega_entrada": str(bodega_ent),
         "f450_docto_alterno": "",
         "f350_id_co_base": "001",
         "f350_id_tipo_docto_base": "",

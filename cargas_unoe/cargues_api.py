@@ -115,7 +115,7 @@ def enviar_datos_a_siesa():
                         cantidad_carga=row["kg_lote"] #Cantidad en Kilos a cargar
                         item_compo=componente(row["Docto"],item)
                         bodega_comp = lote_bodega(lote_rollo)
-                        tpk(cantidad_carga,lote_rollo,item_compo,bodega_comp)
+                        tpk(cantidad_carga,lote_rollo,item_compo,bodega_comp, "029") #traslado
                         crear_lote(lote_rollo,item,ext1,ext2)
 
 
@@ -163,6 +163,8 @@ def enviar_datos_a_siesa():
                         )
                         logging.info(f"Registro ID {row['id']} enviado y actualizado.")
                     else:
+                        tpk(cantidad_carga,lote, item_compo, bodega_comp, "026") #Reversa del traslado
+                        
                         logging.error(f"Error API para ID {row['id']}: {response.status_code} - {response.text}")
                         
                         data = response.json()
