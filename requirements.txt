@@ -8,5 +8,4 @@ sqlalchemy
 numpy
 python-dotenv
 whitenoise
-"qrcode[pil]"
 python-barcode
