@@ -163,8 +163,12 @@ def enviar_datos_a_siesa():
                         )
                         logging.info(f"Registro ID {row['id']} enviado y actualizado.")
                     else:
-                        tpk(cantidad_carga,lote, item_compo, bodega_comp, "026") #Reversa del traslado
-                        
+
+                        conn.execute(
+                            text("UPDATE registro_produccion SET registro_siesa = 3 WHERE id = :id"),
+                            {"id": row["id"]}
+                        )
+
                         logging.error(f"Error API para ID {row['id']}: {response.status_code} - {response.text}")
                         
                         data = response.json()
