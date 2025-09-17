@@ -11,11 +11,20 @@ PERSISTENT_DIR = Path(AZURE_HOME) if AZURE_HOME else None
 
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'clave-insegura')
 
-DEBUG = False
+# DEBUG control por variable de entorno: export DJANGO_DEBUG=1 (solo temporalmente en producción)
+DEBUG = os.environ.get('DJANGO_DEBUG', '0') == '1'
 
-ALLOWED_HOSTS = ['manufacturakos.azurewebsites.net']  # Puedes usar tuapp.azurewebsites.net
+# Hosts permitidos configurables: "a.com,b.com,localhost"
+ALLOWED_HOSTS = [h.strip() for h in os.environ.get(
+    'DJANGO_ALLOWED_HOSTS', 'manufacturakos.azurewebsites.net,localhost,127.0.0.1'
+).split(',') if h.strip()]
 
-CSRF_TRUSTED_ORIGINS = ['https://manufacturakos.azurewebsites.net']
+# Construye automáticamente CSRF_TRUSTED_ORIGINS para hosts con dominio
+_csrf_origins = []
+for _h in ALLOWED_HOSTS:
+    if _h and _h not in ('localhost', '127.0.0.1') and '.' in _h:
+        _csrf_origins.append(f"https://{_h}")
+CSRF_TRUSTED_ORIGINS = _csrf_origins or ['https://manufacturakos.azurewebsites.net']
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
@@ -130,7 +139,46 @@ STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'scripts_app/static')]
 
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+WHITENOISE_AUTOREFRESH = DEBUG  # Recarga en desarrollo
+WHITENOISE_USE_FINDERS = DEBUG  # Permite servir sin collectstatic cuando DEBUG=True
+
+if not DEBUG:
+    # En producción requiere haber ejecutado: python manage.py collectstatic --noinput
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+# Logging básico para investigar errores 500 en Azure (Log Stream / consola)
+LOG_LEVEL = os.environ.get('DJANGO_LOG_LEVEL', 'INFO')
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '[{levelname}] {asctime} {name} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '[{levelname}] {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': LOG_LEVEL,
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': LOG_LEVEL,
+            'propagate': True,
+        },
+    },
+}
 
 # Login config
 LOGIN_URL = '/login/'
