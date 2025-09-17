@@ -3,3 +3,12 @@ logs/
 run.sh
 envio_siesa.log
 cargas_unoe/__pycache__
+django_app/db.sqlite3
+django_app/*.sqlite3
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.sqlite3
+*.db
+*.sqlite
