@@ -84,6 +84,38 @@ def lote_bodega(id_lote): #Encontrar Lote de OP a buscar
     return item_lote_comp_bodega
 
 
+def cant_bodega_item(lote): #Encontrar item en bodega (Cantidad)
+
+    #Conexion a la base de datos
+    params = urllib.parse.quote_plus(
+        "DRIVER=ODBC Driver 18 for SQL Server;"
+        "SERVER=myappskos.database.windows.net;"
+        "DATABASE=kos_apps;"
+        "UID=kos;"
+        "PWD=Ol38569824*;"
+        "TrustServerCertificate=yes;"
+        "Encrypt=yes;"
+    )
+
+    engine_str = f"mssql+pyodbc:///?odbc_connect={params}"
+    engine = create_engine(engine_str)
+
+    with engine.connect() as conn:
+        query = text("""
+            SELECT *                
+            FROM existencias_lote_019
+        """)
+        df_existencias_cantidad= pd.read_sql(query, conn) # Tabla de inventarios de rollos
+
+        filtro = (
+            df_existencias_cantidad["lote"]==lote
+        )
+
+    cantidad_item =df_existencias_cantidad["existencia"]
+    
+
+    return cantidad_item
+
 def crear_lote(lote_com,item_padre,ext1, ext2):
     
     fecha = datetime.datetime.now()

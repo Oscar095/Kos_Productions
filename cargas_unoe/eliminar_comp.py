@@ -136,6 +136,27 @@ def componente(docto, item): #Extraer Item Componente
 
         return item_componente
 
+def componente_cant(docto, item): #Extraer Item Componente
+        
+        API_URL_BASE = API_COMPONENTES_OP.split("?")[0]
+        API_QUERY_PARAMS = API_COMPONENTES_OP.split("?")[1]
+
+        query_params = API_QUERY_PARAMS.replace("{docto}", str(docto))
+        url = f"{API_URL_BASE}?{query_params}"
+
+        response = requests.get(url, headers=headers, timeout=30)
+
+        data = response.json()
+        page_data=data["detalle"]["Datos"]
+
+        # Extrae los datos
+        
+        df=pd.DataFrame(page_data)
+
+        cant_componente=df.loc[item==df["item_padre"],"cantidad_base"].values[0]
+
+        return cant_componente
+
 def eliminar_lote(item_padre,ext1,ext2,docto,item_componente):
     
     payload= {
