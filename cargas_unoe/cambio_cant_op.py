@@ -5,7 +5,8 @@ from sqlalchemy import create_engine, text
 import os
 from dotenv import load_dotenv
 import urllib
-from eliminar_comp import componente, componente_cant
+from eliminar_comp import componente
+from cambio_lotes_impre import cant_componente_op
 
 load_dotenv()
 
@@ -75,6 +76,16 @@ def cambiar_componente():
                         (df_op["und_medida"] == row["und"])
                     )
 
+                    filtro_rollos = (
+                        (df_op["docto"] == row["Docto"]) &
+                        (df_op["tipo_inv"] == row["tipo_inv"]) &
+                        (df_op["und_medida"] == "KG")
+                    )    
+
+                    if df_op.loc[filtro_rollos].empty:
+                        print(f"No se encontraron polyboard imreso para Docto {row['Docto']}")
+                        continue
+
                     if df_op.loc[filtro].empty:
                         print(f"No se encontraron resultados para Docto {row['Docto']}")
                         continue
@@ -84,12 +95,14 @@ def cambiar_componente():
                         item = df_op.loc[filtro, "id_item"].values[0]
                         ext1 = df_op.loc[filtro, "ext1"].values[0]
                         ext2 = df_op.loc[filtro, "ext2"].values[0]
+                        lote = df_op.loc[filtro_rollos, "lote"].values[0]
                         cantidad_OP = float(df_op.loc[filtro, "cantidad"].values[0]) #Cantidad original en la OP
                         cantidad_reporte = float(row["Cantidad"]) #Cantidad reportada en el registro
 
                         id_comp = componente(row["Docto"], item) #Buscar el item del componente predeterminado
-                        cantidad_comp_op = float(componente_cant(row["Docto"], item)) #Cantidad del componente en la OP
-                        nueva_cant_comp = (cantidad_comp_op / cantidad_OP) * cantidad_reporte
+                        cantidad_comp_op = float(cant_componente_op(ext1, ext2, id_comp)) #Cantidad inventario del componente en la OP
+                        print(cantidad_comp_op)
+                        nueva_cant_comp = (cantidad_comp_op / cantidad_reporte) * cantidad_OP
 
                         payload = {
                             "Movimientos Versión": [
@@ -109,7 +122,7 @@ def cambiar_componente():
                                     "f860_codigo_barras_item_comp": "",
                                     "f851_id_ext1_detalle_item_comp": str(ext1),
                                     "f851_id_ext2_detalle_item_comp": str(ext2),
-                                    "f860_cant_requerida_base": int(nueva_cant_comp),
+                                    "f860_cant_requerida_base": float(nueva_cant_comp),
                                     "f860_cant_requerida_2": "0",
                                     "f860_notas": "Modificacion Cantidad"
                                 }

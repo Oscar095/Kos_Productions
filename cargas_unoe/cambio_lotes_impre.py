@@ -84,6 +84,48 @@ def lote_bodega(id_lote): #Encontrar Lote de OP a buscar
     return item_lote_comp_bodega
 
 
+def cant_componente_op(ext1, ext2, item): #Encontrar Lote de OP a buscar
+
+    ext1=str(ext1).strip()
+    ext2=str(ext2).strip()
+
+    #Conexion a la base de datos
+    params = urllib.parse.quote_plus(
+        "DRIVER=ODBC Driver 18 for SQL Server;"
+        "SERVER=myappskos.database.windows.net;"
+        "DATABASE=kos_apps;"
+        "UID=kos;"
+        "PWD=Ol38569824*;"
+        "TrustServerCertificate=yes;"
+        "Encrypt=yes;"
+    )
+
+    engine_str = f"mssql+pyodbc:///?odbc_connect={params}"
+    engine = create_engine(engine_str)
+
+    with engine.connect() as conn:
+        query = text("""
+            SELECT *                
+            FROM existencias_lote_019
+        """)
+        df_existencias = pd.read_sql(query, conn) # Tabla de inventarios de rollos
+
+        df_existencias["ext1"] = df_existencias["ext1"].astype(str).str.strip()
+        df_existencias["ext2"] = df_existencias["ext2"].astype(str).str.strip()
+
+        filtro = ((df_existencias["ext1"] == ext1) & 
+                  (df_existencias["ext2"] == ext2) & 
+                  (df_existencias["id_item"] == int(item))
+                   )
+
+        if df_existencias.loc[filtro].empty:
+             print(f"No se encontraron resultados para ext1={ext1}, ext2={ext2}, id_item={item}")
+
+        cantidad  = df_existencias.loc[filtro,"existencia"].values[0] 
+
+    return cantidad
+
+
 def cant_bodega_item(lote): #Encontrar item en bodega (Cantidad)
 
     #Conexion a la base de datos
@@ -188,4 +230,3 @@ def cambiar_lotes(lote_rollo,ext1,ext2,cant,docto,item_padre):
 
     except Exception as e:
         print(f"Excepción en envío del ID: {e}")
-
