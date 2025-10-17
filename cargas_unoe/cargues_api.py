@@ -8,6 +8,7 @@ import pyodbc
 import os
 import logging
 from cambio_lotes_impre import cambiar_lotes, crear_lote
+from cambio_cant_op import cambiar_componente
 from eliminar_comp import tpk, componente
 from cambio_lotes_impre import lote_bodega
 
@@ -164,6 +165,9 @@ def enviar_datos_a_siesa():
                         logging.info(f"Registro ID {row['id']} enviado y actualizado.")
                     else:
 
+                        if df_op.loc[filtro,"tipo_inv"].values[0]=="IN1410K.ex" and df_op.loc[filtro,"und_medida"].values[0]=="KG":
+                            tpk(cantidad_carga,lote_rollo,item_compo,"029", "026") #Reversa del traslado en caso de error
+
                         conn.execute(
                             text("UPDATE registro_produccion SET registro_siesa = 3 WHERE id = :id"),
                             {"id": row["id"]}
@@ -179,6 +183,9 @@ def enviar_datos_a_siesa():
                              text("UPDATE registro_produccion SET resultado_siesa = :detalle WHERE id = :id"),
                                 {"detalle": f_detalle, "id": row["id"]}
                         )
+
+                        if f_detalle == "5-Argument 'Number' is not a valid value." :
+                            cambiar_componente() #Modifica el componente de la OP de Hojilla, cuando el valor es superior a la OP
 
                 except Exception as e:
                     logging.exception(f"Excepción en envío del ID {row['id']}: {e}")

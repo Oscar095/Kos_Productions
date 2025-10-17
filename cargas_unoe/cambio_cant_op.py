@@ -171,5 +171,3 @@ def cambiar_componente():
 
     except Exception as e:
         print(f"Error general en cambiar_componente: {e}")
-
-cambiar_componente()
