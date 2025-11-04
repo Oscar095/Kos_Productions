@@ -101,8 +101,11 @@ def cambiar_componente():
 
                         id_comp = componente(row["Docto"], item) #Buscar el item del componente predeterminado
                         cantidad_comp_op = float(cant_componente_op(ext1, ext2, id_comp)) #Cantidad inventario del componente en la OP
-                        print(cantidad_comp_op)
-                        nueva_cant_comp = (cantidad_comp_op / cantidad_reporte) * cantidad_OP
+                        
+                        if cantidad_comp_op > cantidad_OP * 0.9:
+                            nueva_cant_comp = (cantidad_comp_op / cantidad_reporte) * cantidad_OP
+                        else:
+                            nueva_cant_comp = cantidad_reporte
 
                         payload = {
                             "Movimientos Versión": [
