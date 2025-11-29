@@ -36,7 +36,7 @@ API_URL = os.getenv("API_CAMBIAR_LOTES") #Permite modificar Componentes en OP
 
 def cambiar_componente():
 
-    #subprocess.run(["python", "consulta_sql_bodega019.py"])
+    subprocess.run(["python", "consulta_sql_bodega019.py"])
 
     try:
         # 1. Leer registros pendientes
