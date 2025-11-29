@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 import urllib
 from eliminar_comp import componente
 from cambio_lotes_impre import cant_componente_op
+import subprocess
 
 load_dotenv()
 
@@ -34,6 +35,9 @@ headers = {
 API_URL = os.getenv("API_CAMBIAR_LOTES") #Permite modificar Componentes en OP
 
 def cambiar_componente():
+
+    #subprocess.run(["python", "consulta_sql_bodega019.py"])
+
     try:
         # 1. Leer registros pendientes
         with engine.connect() as conn:
@@ -61,6 +65,7 @@ def cambiar_componente():
             query_ops = text("SELECT * FROM op_numeros")
             df_op = pd.read_sql(query_ops, conn)
             df_op["und_medida"] = df_op["und_medida"].astype(str).str.strip()
+            df_op["cant_pendiente"] = (df_op["cantidad"] - df_op["cant_consumida"]).where(df_op["cant_consumida"] < df_op["cantidad"], 0)
 
         if df.empty:
             print("No hay registros pendientes.")
@@ -90,22 +95,32 @@ def cambiar_componente():
                         print(f"No se encontraron resultados para Docto {row['Docto']}")
                         continue
 
+                    print(f"Procesando Docto {row['Docto']}")
+
                     # Solo construir y enviar payload si la condición es válida
                     if row["resultado_siesa"] == "5-Argument 'Number' is not a valid value.":
                         item = df_op.loc[filtro, "id_item"].values[0]
                         ext1 = df_op.loc[filtro, "ext1"].values[0]
                         ext2 = df_op.loc[filtro, "ext2"].values[0]
                         lote = df_op.loc[filtro_rollos, "lote"].values[0]
+                        #cantidad_comp_op = df_op.loc[filtro_rollos, "cantidad"].values[0] #Catidad Original del Componente en la OP
                         cantidad_OP = float(df_op.loc[filtro, "cantidad"].values[0]) #Cantidad original en la OP
                         cantidad_reporte = float(row["Cantidad"]) #Cantidad reportada en el registro
-
+                        cantidad_pendiente = float(df_op.loc[filtro, "cant_pendiente"].values[0]) #Cantidad pendiente en la OP
+                        cant_componente_op_req = df_op.loc[filtro_rollos, "cantidad"].values[0]
                         id_comp = componente(row["Docto"], item) #Buscar el item del componente predeterminado
                         cantidad_comp_op = float(cant_componente_op(ext1, ext2, id_comp)) #Cantidad inventario del componente en la OP
-                        
-                        if cantidad_comp_op > cantidad_OP * 0.9:
-                            nueva_cant_comp = (cantidad_comp_op / cantidad_reporte) * cantidad_OP
+                        cantidad_pendiente_comp = float(df_op.loc[filtro_rollos, "cant_pendiente"].values[0]) #Cantidad pendiente del componente en la OP
+                        kilos_requeridos = (cant_componente_op_req / cantidad_OP) * cantidad_reporte
+
+                        print(f"Cantidad Componente OP: {cantidad_comp_op}, Cantidad OP: {cantidad_OP}, Cantidad Reporte: {cantidad_reporte}, item_comp: {id_comp}")
+
+                        print(f"Kilos Requeridos: {kilos_requeridos}, Numero OP: {row['Docto']}")
+
+                        if kilos_requeridos > cantidad_comp_op and cantidad_pendiente_comp < cantidad_comp_op:
+                            nueva_cant_comp = (cantidad_comp_op * cantidad_OP) / cantidad_reporte
                         else:
-                            nueva_cant_comp = cantidad_reporte
+                            nueva_cant_comp = cant_componente_op_req
 
                         payload = {
                             "Movimientos Versión": [
@@ -174,3 +189,5 @@ def cambiar_componente():
 
     except Exception as e:
         print(f"Error general en cambiar_componente: {e}")
+
+cambiar_componente()

@@ -84,8 +84,7 @@ def lote_bodega(id_lote): #Encontrar Lote de OP a buscar
     return item_lote_comp_bodega
 
 
-def cant_componente_op(ext1, ext2, item): #Encontrar Lote de OP a buscar
-
+def cant_componente_op(ext1, ext2, item): 
     ext1=str(ext1).strip()
     ext2=str(ext2).strip()
 
@@ -121,7 +120,7 @@ def cant_componente_op(ext1, ext2, item): #Encontrar Lote de OP a buscar
         if df_existencias.loc[filtro].empty:
              print(f"No se encontraron resultados para ext1={ext1}, ext2={ext2}, id_item={item}")
 
-        cantidad  = df_existencias.loc[filtro,"existencia"].values[0] 
+        cantidad  = df_existencias.loc[filtro,"existencia"].sum()
 
     return cantidad
 
