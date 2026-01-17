@@ -68,6 +68,7 @@ def enviar_datos_a_siesa():
                     LEFT JOIN personal_planta pp ON rp.operario= pp.Id
                     LEFT JOIN centro_costos cc on m.centro_costos_id = cc.Id
                 WHERE registro_siesa = 0
+                      AND rp.fecha >= DATEADD(MONTH, -2, CAST(GETDATE() AS DATE));
             """)
             df = pd.read_sql(query, conn) # Tabla de Registros de OP
             df["lote"] = df["lote"].astype(str).str.strip()
