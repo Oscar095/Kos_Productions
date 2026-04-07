@@ -1,11 +1,9 @@
-django>=4.2
-gunicorn
+fastapi
+uvicorn[standard]
 pyodbc
-django-mssql-backend
 requests
 pandas
 sqlalchemy
 numpy
 python-dotenv
-whitenoise
 python-barcode
