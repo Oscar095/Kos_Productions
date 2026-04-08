@@ -19,8 +19,19 @@ jobs:
           python-version: '3.10'
 
       - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Zip application files
         run: |
-          pip install -r requirements.txt
+          zip -r app.zip . \
+            --exclude ".git/*" \
+            --exclude "django_app/*" \
+            --exclude ".venv/*" \
+            --exclude "antenv/*" \
+            --exclude "Barcodes/*" \
+            --exclude "__pycache__/*" \
+            --exclude "*.pyc" \
+            --exclude "app.zip"
 
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
@@ -28,4 +39,4 @@ jobs:
           app-name: 'manufacturakos'
           slot-name: 'Production'
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_BCAD3B138F784A128E538E7D0DDB7BAD }}
-          package: .
+          package: app.zip
