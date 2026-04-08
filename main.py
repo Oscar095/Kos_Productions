@@ -31,3 +31,8 @@ def actualizar_bodega019(background_tasks: BackgroundTasks):
     """Sincroniza existencias_lote_019 (bodega 019) desde la API SIESA Connekta."""
     background_tasks.add_task(bodega019.main)
     return {"status": "accepted", "message": "Proceso iniciado en background"}
+
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)

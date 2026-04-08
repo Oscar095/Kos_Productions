@@ -16,7 +16,7 @@ API_OP_NUMEROS = os.getenv("API_OP_NUMEROS")
 API_EXISTENCIAS = os.getenv("API_EXISTENCIAS")
 
 params = urllib.parse.quote_plus(
-    "DRIVER=ODBC Driver 18 for SQL Server;"
+    "DRIVER=ODBC Driver 17 for SQL Server;"
     "SERVER=myappskos.database.windows.net;"
     "DATABASE=kos_apps;"
     "UID=kos;"

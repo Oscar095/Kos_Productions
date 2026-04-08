@@ -15,7 +15,7 @@ CONNI_TOKEN = os.getenv("CONNI_TOKEN")
 API_EXISTENCIAS_019 = os.getenv("API_EXISTENCIAS_019")
 
 params = urllib.parse.quote_plus(
-    "DRIVER=ODBC Driver 18 for SQL Server;"
+    "DRIVER=ODBC Driver 17 for SQL Server;"
     "SERVER=myappskos.database.windows.net;"
     "DATABASE=kos_apps;"
     "UID=kos;"
