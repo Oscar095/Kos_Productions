@@ -1,6 +1,6 @@
 import sys
 import os
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, BackgroundTasks
 
 # Agregar cargas_unoe al path para resolver imports relativos del script
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "cargas_unoe"))
@@ -12,31 +12,22 @@ import consulta_sql_bodega019 as bodega019
 app = FastAPI(title="Kos Productions API")
 
 
-@app.post("/cargar-siesa")
-def cargar_siesa():
+@app.post("/cargar-siesa", status_code=202)
+def cargar_siesa(background_tasks: BackgroundTasks):
     """Envía registros de producción pendientes a SIESA."""
-    try:
-        enviar_datos_a_siesa()
-        return {"status": "ok"}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    background_tasks.add_task(enviar_datos_a_siesa)
+    return {"status": "accepted", "message": "Proceso iniciado en background"}
 
 
-@app.post("/actualizar-consultas")
-def actualizar_consultas():
+@app.post("/actualizar-consultas", status_code=202)
+def actualizar_consultas(background_tasks: BackgroundTasks):
     """Sincroniza op_numeros y existencias desde la API SIESA Connekta."""
-    try:
-        consultas.main()
-        return {"status": "ok"}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    background_tasks.add_task(consultas.main)
+    return {"status": "accepted", "message": "Proceso iniciado en background"}
 
 
-@app.post("/actualizar-bodega019")
-def actualizar_bodega019():
+@app.post("/actualizar-bodega019", status_code=202)
+def actualizar_bodega019(background_tasks: BackgroundTasks):
     """Sincroniza existencias_lote_019 (bodega 019) desde la API SIESA Connekta."""
-    try:
-        bodega019.main()
-        return {"status": "ok"}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    background_tasks.add_task(bodega019.main)
+    return {"status": "accepted", "message": "Proceso iniciado en background"}
