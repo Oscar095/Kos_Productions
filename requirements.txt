@@ -1,0 +1,9 @@
+fastapi
+uvicorn[standard]
+pyodbc
+requests
+pandas
+sqlalchemy
+numpy
+python-dotenv
+python-barcode

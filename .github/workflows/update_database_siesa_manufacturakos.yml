@@ -1,0 +1,44 @@
+name: Build and deploy Python app to Azure Web App - manufacturakos
+
+on:
+  push:
+    branches:
+      - update_database_siesa
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Create virtual environment with dependencies
+        run: |
+          python -m venv antenv
+          antenv/bin/pip install -r requirements.txt
+
+      - name: Zip application files
+        run: |
+          zip -r app.zip . \
+            --exclude ".git/*" \
+            --exclude "django_app/*" \
+            --exclude ".venv/*" \
+            --exclude "Barcodes/*" \
+            --exclude "__pycache__/*" \
+            --exclude "*.pyc" \
+            --exclude ".python_packages/*" \
+            --exclude "app.zip"
+
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: 'manufacturakos'
+          slot-name: 'Production'
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_BCAD3B138F784A128E538E7D0DDB7BAD }}
+          package: app.zip

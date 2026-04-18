@@ -1,0 +1,26 @@
+{
+  "Documentos": [
+    {
+      "f350_id_tipo_docto": "",
+      "f350_consec_docto": "",
+      "f350_fecha": "",
+      "f350_notas": ""
+    }
+  ],
+  "Movimientos": [
+    {
+      "f470_id_tipo_docto": "",
+      "f470_consec_docto": "",
+      "f470_nro_registro": "",
+      "f850_consec_docto": "",
+      "f470_id_item": "",
+      "f470_referencia_item": "",
+      "f470_codigo_barras": "",
+      "f470_id_ext1_detalle": "",
+      "f470_id_ext2_detalle": "",
+      "f470_id_bodega": "",
+      "f470_id_lote": "",
+      "f470_cant_base_entrega": ""
+    }
+  ]
+}

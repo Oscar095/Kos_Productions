@@ -1,0 +1,23 @@
+.venv/
+logs/
+run.sh
+*.log
+cargas_unoe/__pycache__
+django_app/db.sqlite3
+django_app/*.sqlite3
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.sqlite3
+*.db
+*.sqlite
+
+# Env y secretos
+.env
+
+# Carpeta Django (ya no se usa)
+django_app/
+
+# Barcodes generados
+Barcodes/

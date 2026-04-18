@@ -1,0 +1,29 @@
+body {
+  background: #f6f9ff;
+  font-family: "Poppins", sans-serif;
+}
+
+.card {
+  border: none;
+  border-radius: 8px;
+  box-shadow: 0 0 30px rgba(1, 41, 112, 0.1);
+}
+
+.card-title {
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.btn-primary {
+  background-color: #4154f1;
+  border: none;
+}
+
+.btn-primary:hover {
+  background-color: #3a45d2;
+}
+
+.alert {
+  font-size: 14px;
+  padding: 10px;
+}
