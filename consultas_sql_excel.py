@@ -5,7 +5,10 @@ import urllib
 from dotenv import load_dotenv
 import os
 import pyodbc
+import logging
 from datetime import datetime
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 
 # Cargar variables del archivo .env
 load_dotenv()
@@ -81,25 +84,36 @@ def fetch_data(base_url):
     return df
 
 
+def parse_siesa_date(series):
+    return pd.to_datetime(series, format="%Y-%m-%dT%H:%M:%S", errors="coerce")
+
+
 def main():
-    df_op = fetch_data(API_OP_NUMEROS)
-    df_op = df_op.drop("LineaRegistro",axis=1)  
+    try:
+        df_op = fetch_data(API_OP_NUMEROS)
+        df_op = df_op.drop("LineaRegistro", axis=1)
 
-    df_existencias = fetch_data(API_EXISTENCIAS)
-    df_existencias = df_existencias.drop("LineaRegistro",axis=1)
+        if "f851_fecha_terminacion" in df_op.columns:
+            df_op["f851_fecha_terminacion"] = parse_siesa_date(df_op["f851_fecha_terminacion"])
 
-    with engine.begin() as conn_dest:
-    # Eliminar los datos de ambas tablas
-        conn_dest.execute(text("DELETE FROM op_numeros"))
-        conn_dest.execute(text("DBCC CHECKIDENT ('op_numeros', RESEED, 0)"))
-        
-        conn_dest.execute(text("DELETE FROM existencias"))
-        conn_dest.execute(text("DBCC CHECKIDENT ('existencias', RESEED, 0)"))
+        df_existencias = fetch_data(API_EXISTENCIAS)
+        df_existencias = df_existencias.drop("LineaRegistro", axis=1)
 
-    df_op.to_sql("op_numeros", con=engine, if_exists='append', index=False, chunksize=500)
-    df_existencias.to_sql("existencias", con=engine, if_exists='append', index=False, chunksize=500)
+        with engine.begin() as conn_dest:
+            conn_dest.execute(text("DELETE FROM op_numeros"))
+            conn_dest.execute(text("DBCC CHECKIDENT ('op_numeros', RESEED, 0)"))
 
-    print("Datos cargados correctamente en Azure SQL: ", datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+            conn_dest.execute(text("DELETE FROM existencias"))
+            conn_dest.execute(text("DBCC CHECKIDENT ('existencias', RESEED, 0)"))
+
+        df_op.to_sql("op_numeros", con=engine, if_exists='append', index=False, chunksize=500)
+        df_existencias.to_sql("existencias", con=engine, if_exists='append', index=False, chunksize=500)
+
+        logging.info("Datos cargados correctamente en Azure SQL: %s", datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+
+    except Exception as e:
+        logging.error("Error en actualizar-consultas: %s", e, exc_info=True)
+        raise
 
 
 if __name__ == "__main__":
